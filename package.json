@@ -1,7 +1,7 @@
 {
-  "name": "webpack-boilerplate",
+  "name": "sihf-ranking-2019-2020",
   "version": "1.0.0",
-  "description": "Webpack 4 Boilerplate",
+  "description": "A visualisation prototype of the history of the SIHF NL regular reason 19/20.",
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack-dev-server --config config/webpack.dev.js",

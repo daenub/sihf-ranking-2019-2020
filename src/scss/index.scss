@@ -1,0 +1,13 @@
+@import 'variables';
+
+html {
+  font-size: $root-font-size;
+}
+
+.team-rank-text {
+  font-family: "Helvetica", Arial, sans-sarif;
+  fill: $white;
+  text-anchor: middle;
+  font-size: .75em;
+  text-align: center;
+}

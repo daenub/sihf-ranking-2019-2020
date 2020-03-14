@@ -129,6 +129,8 @@ const teamRanks = svg.selectAll("g.team-ranks")
   .append("g")
   .classed("team-ranks", true)
   .attr("opacity", 0)
+  .attr("visibility", "hidden")
+  .attr("pointer-events", "none")
 
 teamRanks.each((d, teamIndex, nodes) => {
   const elemEnter = d3.select(nodes[teamIndex])
@@ -153,13 +155,25 @@ teamRanks.each((d, teamIndex, nodes) => {
 })
 
 // Team logos
-svg.selectAll("circle.team-logo")
+const startLogos = svg.selectAll("circle.team-logo-start")
   .data(teamRankingsPerRound)
   .enter()
   .append("circle")
-  .classed("team-logo", true)
+  .classed("team-logo-start", true)
   .attr("cx", -20)
   .attr("cy", (d) => y(d.rankings[0] + 1))
+  .attr("r", 20)
+  .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
+  .on("mouseover", teamPathMouseOver)
+  .on("mouseleave", teamPathMouseLeave)
+
+const endLogos = svg.selectAll("circle.team-logo-end")
+  .data(teamRankingsPerRound)
+  .enter()
+  .append("circle")
+  .classed("team-logo-end", true)
+  .attr("cx", width)
+  .attr("cy", (d) => y(d.rankings[d.rankings.length - 1] + 1))
   .attr("r", 20)
   .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
   .on("mouseover", teamPathMouseOver)
@@ -171,9 +185,20 @@ function teamPathMouseOver(d, i) {
       .attr("opacity", teamIndex === i ? 1 : 0.25)
   })
 
+  startLogos.each((d, teamIndex, nodes) => {
+    d3.select(nodes[teamIndex])
+      .attr("opacity", teamIndex === i ? 1 : 0.25)
+  })
+
+  endLogos.each((d, teamIndex, nodes) => {
+    d3.select(nodes[teamIndex])
+      .attr("opacity", teamIndex === i ? 1 : 0.25)
+  })
+
   teamRanks.each((d, teamIndex, nodes) => {
     d3.select(nodes[teamIndex])
       .attr("opacity", teamIndex === i ? 1 : 0)
+      .attr("visibility", teamIndex === i ? "visible" : "hidden")
   })
 }
 
@@ -183,8 +208,19 @@ function teamPathMouseLeave() {
       .attr("opacity", 1)
   })
 
+  startLogos.each((d, teamIndex, nodes) => {
+    d3.select(nodes[teamIndex])
+      .attr("opacity", 1)
+  })
+
+  endLogos.each((d, teamIndex, nodes) => {
+    d3.select(nodes[teamIndex])
+      .attr("opacity", 1)
+  })
+
   teamRanks.each((d, teamIndex, nodes) => {
     d3.select(nodes[teamIndex])
       .attr("opacity", 0)
+      .attr("visibility", "hidden")
   })
 }

@@ -154,14 +154,16 @@ teamRanks.each((d, teamIndex, nodes) => {
 
 // Team logos
 svg.selectAll("circle.team-logo")
-  .data(rankingByRound[0])
+  .data(teamRankingsPerRound)
   .enter()
   .append("circle")
   .classed("team-logo", true)
   .attr("cx", -20)
-  .attr("cy", (d, i) => y(i + 1))
+  .attr("cy", (d) => y(d.rankings[0] + 1))
   .attr("r", 20)
-  .attr("fill", (d) => `url(#${getLogoIdByName(d)})`)
+  .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
+  .on("mouseover", teamPathMouseOver)
+  .on("mouseleave", teamPathMouseLeave)
 
 function teamPathMouseOver(d, i) {
   teamPaths.each((d, teamIndex, nodes) => {

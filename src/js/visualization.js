@@ -183,7 +183,6 @@ function appendLogos(group, d, teamIndex) {
 
 function teamPathMouseOver(i) {
   teamGroups.each((d, teamIndex, nodes) => {
-    console.log(teamIndex === i, d, teamIndex, i)
     d3.select(nodes[teamIndex])
       .classed("disabled", teamIndex !== i)
       .classed("active", teamIndex === i)

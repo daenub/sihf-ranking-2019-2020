@@ -78,6 +78,5 @@ const teamRankingsPerRound = teams.map(t => {
 export {
   teams,
   roundList,
-  rankingByRound,
   teamRankingsPerRound
 }

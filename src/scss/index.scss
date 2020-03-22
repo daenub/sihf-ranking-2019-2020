@@ -11,3 +11,25 @@ html {
   font-size: .75em;
   text-align: center;
 }
+
+
+.team {
+  transition: .2s ease opacity;
+  will-change: opacity;
+
+  &.disabled {
+    opacity: 0.25;
+  }
+}
+
+.team-ranks {
+  transition: .2s ease opacity;
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity, visibility;
+
+  .team.active & {
+    opacity: 1;
+    visibility: visible;
+  }
+}

@@ -2,7 +2,6 @@ import * as d3 from "d3"
 import {
   teams,
   roundList,
-  rankingByRound,
   teamRankingsPerRound,
 } from "./ranking"
 
@@ -102,38 +101,45 @@ svg.selectAll("rect.round")
   .attr("height", height)
 
 
-// Paths of teams
-const teamPaths = svg.selectAll("path.team")
-  .data(teamRankingsPerRound)
-  .enter()
-  .append("path")
-  .classed("team", true)
-  .attr("fill", "none")
-  .attr("stroke", "#000")
-  .attr("stroke-width", 4)
-  .attr("d", d => {
-      const line = d3.line()
-        .x(function(d, i) { return x(i + 1) })
-        .y(function(d) { return y(d + 1) })
-
-      return line(d.rankings)
-    }
-  )
-  .on("mouseover", teamPathMouseOver)
-  .on("mouseleave", teamPathMouseLeave)
-
-// Ranking numbers
-const teamRanks = svg.selectAll("g.team-ranks")
+const teamGroups = svg.selectAll("g.team")
   .data(teamRankingsPerRound)
   .enter()
   .append("g")
-  .classed("team-ranks", true)
-  .attr("opacity", 0)
-  .attr("visibility", "hidden")
-  .attr("pointer-events", "none")
+  .classed("team", true)
 
-teamRanks.each((d, teamIndex, nodes) => {
-  const elemEnter = d3.select(nodes[teamIndex])
+teamGroups.each((d, teamIndex, nodes) => {
+  const teamGroup = d3.select(nodes[teamIndex])
+
+  appendHistoryPaths(teamGroup, d, teamIndex)
+  appendRankingNumbers(teamGroup, d, teamIndex)
+  appendLogos(teamGroup, d, teamIndex)
+})
+
+function appendHistoryPaths(group, d, teamIndex) {
+  group.append("path")
+    .classed("team-path", true)
+    .attr("fill", "none")
+    .attr("stroke", "#000")
+    .attr("stroke-width", 4)
+    .attr("d", d => {
+        const line = d3.line()
+          .x(function(d, i) { return x(i + 1) })
+          .y(function(d) { return y(d + 1) })
+
+        return line(d.rankings)
+      }
+    )
+    .on("mouseover", () => teamPathMouseOver(teamIndex))
+    .on("mouseleave", () => teamPathMouseLeave(teamIndex))
+}
+
+// Ranking numbers
+function appendRankingNumbers(group, d) {
+  const teamRankingNumbers = group.append("g")
+    .classed("team-ranks", true)
+    .attr("pointer-events", "none")
+
+  const elemEnter = teamRankingNumbers
     .selectAll("circle.team-rank")
     .data(d.rankings)
     .enter()
@@ -152,75 +158,42 @@ teamRanks.each((d, teamIndex, nodes) => {
     .attr("x", (d, i) => x(i + 1))
     .attr("y", (d, i) => y(d + 1))
     .attr("transform", "translate(0, 4)")
-})
+}
 
-// Team logos
-const startLogos = svg.selectAll("circle.team-logo-start")
-  .data(teamRankingsPerRound)
-  .enter()
-  .append("circle")
-  .classed("team-logo-start", true)
-  .attr("cx", -20)
-  .attr("cy", (d) => y(d.rankings[0] + 1))
-  .attr("r", 20)
-  .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
-  .on("mouseover", teamPathMouseOver)
-  .on("mouseleave", teamPathMouseLeave)
+function appendLogos(group, d, teamIndex) {
+  const startLogos = group.append("circle")
+    .classed("team-logo-start", true)
+    .attr("cx", -20)
+    .attr("cy", (d) => y(d.rankings[0] + 1))
+    .attr("r", 20)
+    .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
+    .on("mouseover", () => teamPathMouseOver(teamIndex))
+    .on("mouseleave", () => teamPathMouseLeave(teamIndex))
 
-const endLogos = svg.selectAll("circle.team-logo-end")
-  .data(teamRankingsPerRound)
-  .enter()
-  .append("circle")
-  .classed("team-logo-end", true)
-  .attr("cx", width)
-  .attr("cy", (d) => y(d.rankings[d.rankings.length - 1] + 1))
-  .attr("r", 20)
-  .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
-  .on("mouseover", teamPathMouseOver)
-  .on("mouseleave", teamPathMouseLeave)
+  const endLogos = group.append("circle")
+    .classed("team-logo-end", true)
+    .attr("cx", width)
+    .attr("cy", (d) => y(d.rankings[d.rankings.length - 1] + 1))
+    .attr("r", 20)
+    .attr("fill", (d) => `url(#${getLogoIdByName({name: d.team})})`)
+    .on("mouseover", () => teamPathMouseOver(teamIndex))
+    .on("mouseleave", () => teamPathMouseLeave(teamIndex))
+}
 
-function teamPathMouseOver(d, i) {
-  teamPaths.each((d, teamIndex, nodes) => {
+
+function teamPathMouseOver(i) {
+  teamGroups.each((d, teamIndex, nodes) => {
+    console.log(teamIndex === i, d, teamIndex, i)
     d3.select(nodes[teamIndex])
-      .attr("opacity", teamIndex === i ? 1 : 0.25)
-  })
-
-  startLogos.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", teamIndex === i ? 1 : 0.25)
-  })
-
-  endLogos.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", teamIndex === i ? 1 : 0.25)
-  })
-
-  teamRanks.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", teamIndex === i ? 1 : 0)
-      .attr("visibility", teamIndex === i ? "visible" : "hidden")
+      .classed("disabled", teamIndex !== i)
+      .classed("active", teamIndex === i)
   })
 }
 
-function teamPathMouseLeave() {
-  teamPaths.each((d, teamIndex, nodes) => {
+function teamPathMouseLeave(i) {
+  teamGroups.each((d, teamIndex, nodes) => {
     d3.select(nodes[teamIndex])
-      .attr("opacity", 1)
-  })
-
-  startLogos.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", 1)
-  })
-
-  endLogos.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", 1)
-  })
-
-  teamRanks.each((d, teamIndex, nodes) => {
-    d3.select(nodes[teamIndex])
-      .attr("opacity", 0)
-      .attr("visibility", "hidden")
+      .classed("disabled", false)
+      .classed("active", false)
   })
 }
